@@ -85,3 +85,27 @@ ul {
     outline: none;
     background: #ffffff;
 }
+
+.ui-front {
+	width: 300px;
+}
+
+.ui-helper-hidden-accessible {
+    display: none;
+}
+
+.wrapper {
+    margin: auto;
+    max-width: 600px;
+}
+
+.description {
+    padding-left: 20px;
+    width: 300px;
+    position: absolute;
+}
+
+li h3 {
+    text-align: center;
+    margin-top: 0;
+}

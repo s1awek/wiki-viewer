@@ -19,27 +19,53 @@ $(function () {
                         continue;
                     } else {
 
-                        document.getElementsByClassName('wrapper')[0].innerHTML += '<li class="clearfix">' + '<img class="thumbnail" src="' + data['query']['pages'][key]['thumbnail']['source'] + '">' + data['query']['pages'][key]['extract'] + '</li>';
+                        document.getElementsByClassName('articles-list')[0].innerHTML += '<li class="clearfix">' + '<img class="thumbnail" src="' + data['query']['pages'][key]['thumbnail']['source'] + '"><span class="description"><h3>' + data['query']['pages'][key]['title'] + '</h3>' + data['query']['pages'][key]['extract'] + '</span></li>';
                     }
                 }
             } else {
-                document.getElementsByClassName('wrapper')[0].innerHTML = 'error';
+                //TODO add nice error handler class
+                document.getElementsByClassName('articles-list')[0].innerHTML = 'error';
             }
 
         }
 
         function errHandler(err) {
-            console.log('error: ', err);
+            console.log('error: ', err.responseText);
+            document.getElementsByTagName('body')[0].innerHTML = err.responseText;
+
         }
     }
 
     $('.search-wiki').keydown(function () {
         $('.search-wiki').autocomplete({
-            source: autoTerms
+            source: autoTerms,
+            appendTo: '.ui-front',
+            minLength: 2,
+            select: function (event, ui) {
+                if (ui.item) {
+                    $('.search-wiki').autocomplete('destroy');
+                    document.getElementsByClassName('articles-list')[0].innerHTML = '';
+                    doIt(ui.item.value);
+                } else {
+                    //TODO investigate if it's possible to even ever trigger that
+                    $('body').text('<h1>error</h1>');
+                }
+            },
+            messages: {
+                noResults: '',
+                results: function () {
+                    return;
+                }
+            },
+            _resizeMenu: function () {
+                this.menu.element.outerWidth(300);
+            }
+
         });
         var val = $('.search-wiki').val();
         if (event.keyCode == 13) {
-            document.getElementsByClassName('wrapper')[0].innerHTML = '';
+            $('.search-wiki').autocomplete('destroy');
+            document.getElementsByClassName('articles-list')[0].innerHTML = '';
             doIt(val);
         }
 
@@ -49,12 +75,11 @@ $(function () {
 
     function autoTerms(request, response) {
         $.ajax({
-            url: "http://en.wikipedia.org/w/api.php",
-            dataType: "jsonp",
-            minLength: 4,
+            url: 'http://en.wikipedia.org/w/api.php',
+            dataType: 'jsonp',
             data: {
-                'action': "opensearch",
-                'format': "json",
+                'action': 'opensearch',
+                'format': 'json',
                 'search': request.term
             },
             success: function (data) {
