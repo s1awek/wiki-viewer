@@ -1,6 +1,6 @@
 $(function () {
     function doIt(searchTerm) {
-        var urlBase = 'https://en.wikipedia.org/w/api.php?format=json&action=query&generator=search&gsrnamespace=0&gsrlimit=20&prop=pageimages|extracts&pilimit=max&pithumbsize=200&exintro&explaintext&exsentences=2&exlimit=max&origin=*&gsrsearch=' +
+        var urlBase = 'https://en.wikipedia.org/w/api.php?format=json&action=query&generator=search&gsrnamespace=0&gsrlimit=20&prop=pageimages|extracts&pilimit=max&pithumbsize=300&exintro&explaintext&exsentences=2&exlimit=max&origin=*&gsrsearch=' +
             searchTerm;
         $.ajax({
             url: urlBase,
@@ -11,15 +11,44 @@ $(function () {
             error: errHandler
         });
 
+        function addNode(el, txt, par, cla, inx, num) {
+            var newEl = document.createElement(el);
+            newEl.appendChild(txt);
+            document.getElementsByClassName(par)[inx].appendChild(newEl);
+            if (num === 1) {
+                $(newEl).addClass(cla + '_' + inx);
+            } else if (num === 0) {
+                $(newEl).addClass(cla);
+            } else {
+                return;
+            }
+        }
+
         function displayContent(data) {
+
+            //            var liTextNode = document.createTextNode();
             if (data['query']) {
+                var counter = 0;
                 for (key in data['query']['pages']) {
 
                     if (data['query']['pages'][key]['pageimage'] === undefined) {
                         continue;
                     } else {
 
-                        document.getElementsByClassName('articles-list')[0].innerHTML += '<li class="clearfix">' + '<img class="thumbnail" src="' + data['query']['pages'][key]['thumbnail']['source'] + '"><span class="description"><h3>' + data['query']['pages'][key]['title'] + '</h3>' + data['query']['pages'][key]['extract'] + '</span></li>';
+                        var extractTxt = document.createTextNode(data['query']['pages'][key]['extract']);
+                        var titleTxt = document.createTextNode(data['query']['pages'][key]['title']);
+                        var imgSrcTxt = data['query']['pages'][key]['thumbnail']['source'];
+                        var emptyTxtNode = document.createTextNode('');
+                        addNode('li', emptyTxtNode, 'articles-list', 'list', 0, 0);
+                        addNode('div', emptyTxtNode, 'list', 'cont', counter, 0);
+                        addNode('div', emptyTxtNode, 'cont', 'img-cont', counter, 0);
+                        addNode('img', emptyTxtNode, 'img-cont', 'thumb', counter, 1);
+                        addNode('div', emptyTxtNode, 'cont', 'cont-ext', counter, 0);
+                        $('.thumb_' + counter).attr("src", imgSrcTxt).addClass('thumb'); //adds src attributte to image and classes .thumb_(inx) and .thumb
+                        $('.cont').addClass('clearfix');
+                        addNode('h3', titleTxt, 'cont-ext', 'title', counter, 3);
+                        addNode('span', extractTxt, 'cont-ext', 'extract', counter, 0);
+                        counter = counter + 1;
                     }
                 }
             } else {
@@ -68,9 +97,6 @@ $(function () {
             document.getElementsByClassName('articles-list')[0].innerHTML = '';
             doIt(val);
         }
-
-
-
     });
 
     function autoTerms(request, response) {
@@ -87,8 +113,4 @@ $(function () {
             }
         });
     }
-
-
-
-
 });
