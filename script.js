@@ -25,13 +25,34 @@ $(function () {
         }
 
         function displayContent(data) {
-
-            //            var liTextNode = document.createTextNode();
             if (data['query']) {
                 var counter = 0;
+                var imgCounter = 0;
                 for (key in data['query']['pages']) {
-
-                    if (data['query']['pages'][key]['pageimage'] === undefined) { //skip positions without image
+                    //TODO wrap it in some neat function to not repeat myself
+                    if (data['query']['pages'][key]['pageimage'] === undefined && imgCounter < 1) {
+                        var extractTxt = document.createTextNode(data['query']['pages'][key]['extract']);
+                        var titleTxt = document.createTextNode(data['query']['pages'][key]['title']);
+                        var titleTxtBig = document.createTextNode(data['query']['pages'][key]['title']);
+                        var emptyTxtNode = document.createTextNode('');
+                        var artLinkId = data['query']['pages'][key]['pageid'];
+                        document.getElementsByClassName('error')[0].innerHTML = '';
+                        addNode('li', emptyTxtNode, 'articles-list', 'list', 0, 0);
+                        addNode('div', emptyTxtNode, 'list', 'cont', counter, 0);
+                        addNode('div', emptyTxtNode, 'cont', 'img-cont', counter, 0);
+                        addNode('div', emptyTxtNode, 'cont', 'cont-ext', counter, 0);
+                        addNode('div', emptyTxtNode, 'cont', 'left-cover', counter, 0);
+                        addNode('div', emptyTxtNode, 'cont', 'right-cover', counter, 0);
+                        addNode('h1', titleTxtBig, 'cont', 'cover-title', counter, 2);
+                        $('.cont').addClass('clearfix');
+                        addNode('a', emptyTxtNode, 'cont-ext', 'link', counter, 1);
+                        $('.link_' + counter).attr('href', 'https://en.wikipedia.org/?curid=' + artLinkId).addClass('title-link').attr('target', '_blank');
+                        addNode('h3', titleTxt, 'title-link', 'title', counter, 2);
+                        addNode('span', extractTxt, 'cont-ext', 'extract', counter, 0);
+                        counter = counter + 1;
+                        imgCounter = imgCounter + 1;
+                        continue;
+                    } else if (data['query']['pages'][key]['pageimage'] === undefined && imgCounter >= 1) {
                         continue;
                     } else {
                         document.getElementsByClassName('error')[0].innerHTML = '';
@@ -56,22 +77,19 @@ $(function () {
                         addNode('h3', titleTxt, 'title-link', 'title', counter, 2);
                         addNode('span', extractTxt, 'cont-ext', 'extract', counter, 0);
                         counter = counter + 1;
-                        console.log(Object.keys(data['query']['pages']).length);
+                        console.log(counter);
                     }
                 }
             } else {
-                                document.getElementsByClassName('error')[0].innerHTML = 'There is no articles to show. Please try again.';
+                document.getElementsByClassName('error')[0].innerHTML = 'There is no articles to show. Please try again.';
             }
-
         }
-        //TODO add error handling class and HTML markup
-        function errHandler(err) {
-            console.log('error: ', err.responseText);
-            document.getElementsByTagName('body')[0].innerHTML = err.responseText;
 
+        function errHandler(err) {
+            console.log('error: ', err.responseText, err);
+            document.getElementsByTagName('error')[0].innerHTML = err.responseText + ' ' + err;
         }
     }
-
     $('.search-wiki').keydown(function () {
         $('.search-wiki').autocomplete({
             source: autoTerms,
@@ -83,8 +101,7 @@ $(function () {
                     document.getElementsByClassName('articles-list')[0].innerHTML = '';
                     doIt(ui.item.value);
                 } else {
-                    //TODO investigate if it's possible to even ever trigger that
-                    $('body').text('<h1>error</h1>');
+                    $('.error').text('Unknown Error');
                 }
             },
             messages: {
