@@ -87,7 +87,7 @@ $(function () {
 
         function errHandler(err) {
             console.log('error: ', err.responseText, err);
-            document.getElementsByTagName('error')[0].innerHTML = err.responseText + ' ' + err;
+            document.getElementsById('error')[0].innerHTML = err.responseText + ' ' + err;
         }
     }
     $('.search-wiki').keydown(function () {
@@ -138,3 +138,4 @@ $(function () {
         });
     }
 });
+
